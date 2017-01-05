@@ -1,3 +1,4 @@
+import org.eclipse.jgit.api.CreateBranchCommand
 import org.eclipse.jgit.api.errors.NoFilepatternException
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.lib.Repository
@@ -14,22 +15,24 @@ import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.transport.CredentialsProvider
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider
 
-
 class MantisGit {
     void test() {
-        String lauraLocalPath = "c:\\TB\\ticketbis\\laura\\"
+        //String lauraLocalPath = "c:\\TB\\ticketbis\\laura\\"
+        String lauraLocalPath = "F:\\PortableGit\\ticketbis\\laura\\"
         String lauraRemotePath = "https://github.com/ticketbis/laura.git"
         String lauraNewBranch = "release/201701032002"
         String lauraOldBranch = "release/201701022004"
 
-        String hulkLocalPath = "c:\\TB\\ticketbis\\hulk\\"
+        //String hulkLocalPath = "c:\\TB\\ticketbis\\hulk\\"
+        String hulkLocalPath = "F:\\PortableGit\\ticketbis\\hulk\\"
         String hulkRemotePath = "https://github.com/ticketbis/hulk.git"
 
-        String colossusLocalPath = "c:\\TB\\ticketbis\\colossus\\"
+        //String colossusLocalPath = "c:\\TB\\ticketbis\\colossus\\"
+        String colossusLocalPath = "F:\\PortableGit\\ticketbis\\colossus\\"
         String colossusRemotePath = "https://github.com/ticketbis/colossus.git"
 
         GitControl lauraGC = new GitControl(lauraLocalPath, lauraRemotePath)
-        if (!new File(lauraLocalPath).exists()) lauraGC.cloneRepo()
+        (!new File(lauraLocalPath).exists()) ? lauraGC.cloneRepo() : lauraGC.refresh()
         lauraGC.checkoutBranch(lauraNewBranch)
         lauraGC.printLog()
 
@@ -76,22 +79,39 @@ class GitControl{
                 .call()
     }
 
-    void pullFromRepo() throws IOException, WrongRepositoryStateException,
-            InvalidConfigurationException, DetachedHeadException,
-            InvalidRemoteException, CanceledException, RefNotFoundException,
-            NoHeadException, GitAPIException {
-        this.git.pull().call();
-    }
-
-    void checkoutBranch(String branch){
-        this.git.checkout()
-                .setName(branch)
+    void refresh(){
+        this.git.fetch()
+                .setCredentialsProvider(this.credentialsProvider)
+                .call()
+        this.git.pull()
+                .setCredentialsProvider(this.credentialsProvider)
                 .call()
     }
 
+    void checkoutBranch(String branch){
+        this.git.branchCreate()
+            .setName(branch)
+            .setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.SET_UPSTREAM)
+            .setStartPoint('origin/' + branch)
+            .call()
+        this.git.checkout()
+                .setName(branch)
+                .setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.SET_UPSTREAM)
+                .call()
+    }
+
+    void printLogBetwee
+
     void printLog(){
         Iterable<RevCommit> commitList = this.git.log().call()
-        commitList.each {println(it)}
+        commitList.each {
+            println('=================================================================')
+            println('HASH:' + it.name)
+            println('AUTHOR: ' + it.authorIdent.name)
+            println('EMAIL: ' + it.authorIdent.emailAddress)
+            println('DATE: ' + it.authorIdent.when)
+            println('MESSAGE: ' + it.fullMessage)
+        }
     }
 }
 
