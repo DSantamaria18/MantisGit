@@ -22,8 +22,8 @@ class MantisGit {
         String lauraLocalPath = "c:\\TB\\ticketbis\\laura\\"
         //String lauraLocalPath = "F:\\PortableGit\\ticketbis\\laura\\"
         String lauraRemotePath = "https://github.com/ticketbis/laura.git"
-        String lauraNewBranch = "release/201701032002"
-        String lauraOldBranch = "release/201701022004"
+        String lauraNewBranch = "release/201701042002"
+        String lauraOldBranch = "release/201701032002"
 
         String hulkLocalPath = "c:\\TB\\ticketbis\\hulk\\"
         //String hulkLocalPath = "F:\\PortableGit\\ticketbis\\hulk\\"
@@ -109,13 +109,15 @@ class GitControl{
         Iterable<RevCommit> commitList = this.git.log().addRange(refFrom, refTo).call();
         int commitNumber = 0
         commitList.each {
-            println('=================================================================')
-            println('HASH:' + it.name)
-            println('AUTHOR: ' + it.authorIdent.name)
-            println('EMAIL: ' + it.authorIdent.emailAddress)
-            println('DATE: ' + it.authorIdent.when)
-            println('MESSAGE: ' + it.fullMessage)
-            commitNumber++
+            if(it.authorIdent.name != 'jenkins'){
+                println('=================================================================')
+                println('HASH:' + it.name)
+                println('AUTHOR: ' + it.authorIdent.name)
+                println('EMAIL: ' + it.authorIdent.emailAddress)
+                println('DATE: ' + it.authorIdent.when)
+                println('MESSAGE: ' + it.fullMessage)
+                commitNumber++
+            }
         }
         println()
         println('TOTAL COMMITS: ' + commitNumber)
