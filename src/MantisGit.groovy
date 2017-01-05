@@ -2,6 +2,7 @@ import org.eclipse.jgit.api.CreateBranchCommand
 import org.eclipse.jgit.api.errors.NoFilepatternException
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.lib.ObjectId
+import org.eclipse.jgit.lib.ObjectReader
 import org.eclipse.jgit.lib.Ref
 import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.api.Git
@@ -14,8 +15,12 @@ import org.eclipse.jgit.api.errors.NoHeadException
 import org.eclipse.jgit.api.errors.RefNotFoundException
 import org.eclipse.jgit.api.errors.WrongRepositoryStateException
 import org.eclipse.jgit.revwalk.RevCommit
+import org.eclipse.jgit.revwalk.RevTree
+import org.eclipse.jgit.revwalk.RevWalk
 import org.eclipse.jgit.transport.CredentialsProvider
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider
+import org.eclipse.jgit.treewalk.AbstractTreeIterator
+import org.eclipse.jgit.treewalk.CanonicalTreeParser
 
 class MantisGit {
     void test() {
@@ -37,7 +42,8 @@ class MantisGit {
         (!new File(lauraLocalPath).exists()) ? lauraGC.cloneRepo() : lauraGC.refresh()
         lauraGC.checkoutBranch(lauraOldBranch)
         lauraGC.checkoutBranch(lauraNewBranch)
-        lauraGC.printLogBetween(lauraOldBranch, lauraNewBranch)
+        lauraGC.printLogBetweenBranches(lauraOldBranch, lauraNewBranch)
+        lauraGC.printDiffBetweenBranches(lauraOldBranch, lauraNewBranch)
 
         GitControl hulkGC = new GitControl(hulkLocalPath, hulkRemotePath)
         if (!new File(hulkLocalPath).exists()) hulkGC.cloneRepo()
@@ -103,7 +109,7 @@ class GitControl{
                 .call()
     }
 
-    void printLogBetween(final String revFrom, final String revTo) throws IOException, GitAPIException {
+    void printLogBetweenBranches(final String revFrom, final String revTo) throws IOException, GitAPIException {
         ObjectId refFrom = this.localRepo.resolve(revFrom);
         ObjectId refTo = this.localRepo.resolve(revTo);
         Iterable<RevCommit> commitList = this.git.log().addRange(refFrom, refTo).call();
@@ -121,6 +127,36 @@ class GitControl{
         }
         println()
         println('TOTAL COMMITS: ' + commitNumber)
+    }
+
+    void printDiffBetweenBranches(String oldBranchName, String newBranchName){
+        ObjectReader reader = this.localRepo.newObjectReader()
+        Ref oldRef = this.localRepo.exactRef(oldBranchName)
+        Ref newRef = this.localRepo.exactRef(newBranchName)
+
+
+
+        AbstractTreeIterator oldTreeIterator = new CanonicalTreeParser()
+        AbstractTreeIterator newTreeIterator = new CanonicalTreeParser()
+
+        RevTree oldTree = new RevWalk(this.localRepo).parseTree(oldRef.getObjectId())
+        RevTree newTree = new RevWalk(this.localRepo).parseTree(newRef.getObjectId())
+
+        oldTreeIterator.reset(reader, oldTree.getId())
+        newTreeIterator.reset(reader, newTree.getId())
+
+        def diffs = this.git.diff()
+            .setNewTree(newTreeIterator)
+            .setOldTree(oldTreeIterator)
+            .call()
+
+
+
+        diffs.each {
+            println(it)
+        }
+
+
     }
 }
 

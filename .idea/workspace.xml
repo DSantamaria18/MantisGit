@@ -27,10 +27,15 @@
       <file leaf-file-name="MantisGit.groovy" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/MantisGit.groovy">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-833">
-              <caret line="25" column="54" selection-start-line="25" selection-start-column="54" selection-end-line="25" selection-end-column="54" />
+            <state relative-caret-position="62">
+              <caret line="131" column="28" selection-start-line="131" selection-start-column="9" selection-end-line="131" selection-end-column="33" />
               <folding>
-                <element signature="n#!!block;n#printLogBetween#0;n#!!block;n#GitControl#0" expanded="true" />
+                <element signature="n#!!block;n#test#0;n#!!block;n#MantisGit#0" expanded="true" />
+                <element signature="n#!!block;n#cloneRepo#0;n#!!block;n#GitControl#0" expanded="true" />
+                <element signature="n#!!block;n#refresh#0;n#!!block;n#GitControl#0" expanded="true" />
+                <element signature="n#!!block;n#checkoutBranch#0;n#!!block;n#GitControl#0" expanded="true" />
+                <element signature="n#!!block;n#printLogBetweenBranches#0;n#!!block;n#GitControl#0" expanded="true" />
+                <element signature="n#!!block;n#printDiffBetweenBranches#0;n#!!block;n#GitControl#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -473,7 +478,21 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="13" />
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/MantisGit.groovy</url>
+          <line>155</line>
+          <properties />
+          <option name="timeStamp" value="13" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/MantisGit.groovy</url>
+          <line>133</line>
+          <properties />
+          <option name="timeStamp" value="14" />
+        </line-breakpoint>
+      </breakpoints>
+      <option name="time" value="15" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -487,7 +506,12 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="n#!!block;n#printLogBetween#0;n#!!block;n#GitControl#0" expanded="true" />
+            <element signature="n#!!block;n#test#0;n#!!block;n#MantisGit#0" expanded="true" />
+            <element signature="n#!!block;n#cloneRepo#0;n#!!block;n#GitControl#0" expanded="true" />
+            <element signature="n#!!block;n#refresh#0;n#!!block;n#GitControl#0" expanded="true" />
+            <element signature="n#!!block;n#checkoutBranch#0;n#!!block;n#GitControl#0" expanded="true" />
+            <element signature="n#!!block;n#printLogBetweenBranches#0;n#!!block;n#GitControl#0" expanded="true" />
+            <element signature="n#!!block;n#printDiffBetweenBranches#0;n#!!block;n#GitControl#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -505,7 +529,12 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="n#!!block;n#printLogBetween#0;n#!!block;n#GitControl#0" expanded="true" />
+            <element signature="n#!!block;n#test#0;n#!!block;n#MantisGit#0" expanded="true" />
+            <element signature="n#!!block;n#cloneRepo#0;n#!!block;n#GitControl#0" expanded="true" />
+            <element signature="n#!!block;n#refresh#0;n#!!block;n#GitControl#0" expanded="true" />
+            <element signature="n#!!block;n#checkoutBranch#0;n#!!block;n#GitControl#0" expanded="true" />
+            <element signature="n#!!block;n#printLogBetweenBranches#0;n#!!block;n#GitControl#0" expanded="true" />
+            <element signature="n#!!block;n#printDiffBetweenBranches#0;n#!!block;n#GitControl#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -523,7 +552,12 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="n#!!block;n#printLogBetween#0;n#!!block;n#GitControl#0" expanded="true" />
+            <element signature="n#!!block;n#test#0;n#!!block;n#MantisGit#0" expanded="true" />
+            <element signature="n#!!block;n#cloneRepo#0;n#!!block;n#GitControl#0" expanded="true" />
+            <element signature="n#!!block;n#refresh#0;n#!!block;n#GitControl#0" expanded="true" />
+            <element signature="n#!!block;n#checkoutBranch#0;n#!!block;n#GitControl#0" expanded="true" />
+            <element signature="n#!!block;n#printLogBetweenBranches#0;n#!!block;n#GitControl#0" expanded="true" />
+            <element signature="n#!!block;n#printDiffBetweenBranches#0;n#!!block;n#GitControl#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -546,10 +580,15 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/MantisGit.groovy">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-833">
-          <caret line="25" column="54" selection-start-line="25" selection-start-column="54" selection-end-line="25" selection-end-column="54" />
+        <state relative-caret-position="62">
+          <caret line="131" column="28" selection-start-line="131" selection-start-column="9" selection-end-line="131" selection-end-column="33" />
           <folding>
-            <element signature="n#!!block;n#printLogBetween#0;n#!!block;n#GitControl#0" expanded="true" />
+            <element signature="n#!!block;n#test#0;n#!!block;n#MantisGit#0" expanded="true" />
+            <element signature="n#!!block;n#cloneRepo#0;n#!!block;n#GitControl#0" expanded="true" />
+            <element signature="n#!!block;n#refresh#0;n#!!block;n#GitControl#0" expanded="true" />
+            <element signature="n#!!block;n#checkoutBranch#0;n#!!block;n#GitControl#0" expanded="true" />
+            <element signature="n#!!block;n#printLogBetweenBranches#0;n#!!block;n#GitControl#0" expanded="true" />
+            <element signature="n#!!block;n#printDiffBetweenBranches#0;n#!!block;n#GitControl#0" expanded="true" />
           </folding>
         </state>
       </provider>
