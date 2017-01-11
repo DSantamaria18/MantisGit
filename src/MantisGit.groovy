@@ -1,6 +1,9 @@
 import org.eclipse.jgit.api.CreateBranchCommand
 import org.eclipse.jgit.api.errors.NoFilepatternException
 import org.eclipse.jgit.internal.storage.file.FileRepository
+import org.eclipse.jgit.lib.ObjectId
+import org.eclipse.jgit.lib.ObjectReader
+import org.eclipse.jgit.lib.Ref
 import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.errors.CanceledException
@@ -12,34 +15,35 @@ import org.eclipse.jgit.api.errors.NoHeadException
 import org.eclipse.jgit.api.errors.RefNotFoundException
 import org.eclipse.jgit.api.errors.WrongRepositoryStateException
 import org.eclipse.jgit.revwalk.RevCommit
+import org.eclipse.jgit.revwalk.RevTree
+import org.eclipse.jgit.revwalk.RevWalk
 import org.eclipse.jgit.transport.CredentialsProvider
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider
+import org.eclipse.jgit.treewalk.AbstractTreeIterator
+import org.eclipse.jgit.treewalk.CanonicalTreeParser
 
 class MantisGit {
     void test() {
-        //String lauraLocalPath = "c:\\TB\\ticketbis\\laura\\"
-        String lauraLocalPath = "F:\\PortableGit\\ticketbis\\laura\\"
+        String lauraLocalPath = "c:\\TB\\ticketbis\\laura\\"
+        //String lauraLocalPath = "F:\\PortableGit\\ticketbis\\laura\\"
         String lauraRemotePath = "https://github.com/ticketbis/laura.git"
-        String lauraNewBranch = "release/201701032002"
-        String lauraOldBranch = "release/201701022004"
+        String lauraNewBranch = "release/201701042002"
+        String lauraOldBranch = "release/201701032002"
 
-        //String hulkLocalPath = "c:\\TB\\ticketbis\\hulk\\"
-        String hulkLocalPath = "F:\\PortableGit\\ticketbis\\hulk\\"
+        String hulkLocalPath = "c:\\TB\\ticketbis\\hulk\\"
+        //String hulkLocalPath = "F:\\PortableGit\\ticketbis\\hulk\\"
         String hulkRemotePath = "https://github.com/ticketbis/hulk.git"
 
-        //String colossusLocalPath = "c:\\TB\\ticketbis\\colossus\\"
-        String colossusLocalPath = "F:\\PortableGit\\ticketbis\\colossus\\"
+        String colossusLocalPath = "c:\\TB\\ticketbis\\colossus\\"
+        //String colossusLocalPath = "F:\\PortableGit\\ticketbis\\colossus\\"
         String colossusRemotePath = "https://github.com/ticketbis/colossus.git"
 
         GitControl lauraGC = new GitControl(lauraLocalPath, lauraRemotePath)
         (!new File(lauraLocalPath).exists()) ? lauraGC.cloneRepo() : lauraGC.refresh()
+        lauraGC.checkoutBranch(lauraOldBranch)
         lauraGC.checkoutBranch(lauraNewBranch)
-        lauraGC.printLog()
-
-
-
-
-
+        lauraGC.printLogBetweenBranches(lauraOldBranch, lauraNewBranch)
+        lauraGC.printDiffBetweenBranches(lauraOldBranch, lauraNewBranch)
 
         GitControl hulkGC = new GitControl(hulkLocalPath, hulkRemotePath)
         if (!new File(hulkLocalPath).exists()) hulkGC.cloneRepo()
@@ -76,12 +80,14 @@ class GitControl{
                 .setURI(this.remotePath)
                 .setDirectory(new File(this.localPath))
                 .setCredentialsProvider(this.credentialsProvider)
+                .setCloneAllBranches(true)
                 .call()
     }
 
     void refresh(){
         this.git.fetch()
                 .setCredentialsProvider(this.credentialsProvider)
+                .setCheckFetchedObjects(true)
                 .call()
         this.git.pull()
                 .setCredentialsProvider(this.credentialsProvider)
@@ -89,29 +95,68 @@ class GitControl{
     }
 
     void checkoutBranch(String branch){
-        this.git.branchCreate()
-            .setName(branch)
-            .setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.SET_UPSTREAM)
-            .setStartPoint('origin/' + branch)
-            .call()
+        boolean branchNotExists = this.localRepo.resolve(branch) == null;
+        if(branchNotExists){
+            this.git.branchCreate()
+                    .setName(branch)
+                    .setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.SET_UPSTREAM)
+                    .setStartPoint('origin/' + branch)
+                    .call()
+        }
         this.git.checkout()
                 .setName(branch)
                 .setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.SET_UPSTREAM)
                 .call()
     }
 
-    void printLogBetwee
-
-    void printLog(){
-        Iterable<RevCommit> commitList = this.git.log().call()
+    void printLogBetweenBranches(final String revFrom, final String revTo) throws IOException, GitAPIException {
+        ObjectId refFrom = this.localRepo.resolve(revFrom);
+        ObjectId refTo = this.localRepo.resolve(revTo);
+        Iterable<RevCommit> commitList = this.git.log().addRange(refFrom, refTo).call();
+        int commitNumber = 0
         commitList.each {
-            println('=================================================================')
-            println('HASH:' + it.name)
-            println('AUTHOR: ' + it.authorIdent.name)
-            println('EMAIL: ' + it.authorIdent.emailAddress)
-            println('DATE: ' + it.authorIdent.when)
-            println('MESSAGE: ' + it.fullMessage)
+            if(it.authorIdent.name != 'jenkins'){
+                println('=================================================================')
+                println('HASH:' + it.name)
+                println('AUTHOR: ' + it.authorIdent.name)
+                println('EMAIL: ' + it.authorIdent.emailAddress)
+                println('DATE: ' + it.authorIdent.when)
+                println('MESSAGE: ' + it.fullMessage)
+                commitNumber++
+            }
         }
+        println()
+        println('TOTAL COMMITS: ' + commitNumber)
+    }
+
+    void printDiffBetweenBranches(String oldBranchName, String newBranchName){
+        ObjectReader reader = this.localRepo.newObjectReader()
+        Ref oldRef = this.localRepo.exactRef(oldBranchName)
+        Ref newRef = this.localRepo.exactRef(newBranchName)
+
+
+
+        AbstractTreeIterator oldTreeIterator = new CanonicalTreeParser()
+        AbstractTreeIterator newTreeIterator = new CanonicalTreeParser()
+
+        RevTree oldTree = new RevWalk(this.localRepo).parseTree(oldRef.getObjectId())
+        RevTree newTree = new RevWalk(this.localRepo).parseTree(newRef.getObjectId())
+
+        oldTreeIterator.reset(reader, oldTree.getId())
+        newTreeIterator.reset(reader, newTree.getId())
+
+        def diffs = this.git.diff()
+            .setNewTree(newTreeIterator)
+            .setOldTree(oldTreeIterator)
+            .call()
+
+
+
+        diffs.each {
+            println(it)
+        }
+
+
     }
 }
 
