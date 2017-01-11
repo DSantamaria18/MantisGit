@@ -27,8 +27,8 @@ class MantisGit {
         String lauraLocalPath = "c:\\TB\\ticketbis\\laura\\"
         //String lauraLocalPath = "F:\\PortableGit\\ticketbis\\laura\\"
         String lauraRemotePath = "https://github.com/ticketbis/laura.git"
-        String lauraNewBranch = "release/201701042002"
-        String lauraOldBranch = "release/201701032002"
+        String lauraNewBranch = "release/201701102001"
+        String lauraOldBranch = "release/201701092003"
 
         String hulkLocalPath = "c:\\TB\\ticketbis\\hulk\\"
         //String hulkLocalPath = "F:\\PortableGit\\ticketbis\\hulk\\"
@@ -42,7 +42,9 @@ class MantisGit {
         (!new File(lauraLocalPath).exists()) ? lauraGC.cloneRepo() : lauraGC.refresh()
         lauraGC.checkoutBranch(lauraOldBranch)
         lauraGC.checkoutBranch(lauraNewBranch)
-        lauraGC.printLogBetweenBranches(lauraOldBranch, lauraNewBranch)
+        //lauraGC.printLogBetweenBranches(lauraOldBranch, lauraNewBranch)
+        //lauraGC.printDiffBetweenBranches(lauraOldBranch, lauraNewBranch)
+        lauraGC.getCommitFromBranchName(lauraNewBranch)
         lauraGC.printDiffBetweenBranches(lauraOldBranch, lauraNewBranch)
 
         GitControl hulkGC = new GitControl(hulkLocalPath, hulkRemotePath)
@@ -52,14 +54,12 @@ class MantisGit {
         if (!new File(colossusLocalPath).exists()) colossusGC.cloneRepo()
 
 
-
-
     }
 
 
 }
 
-class GitControl{
+class GitControl {
     private String localPath, remotePath
     private Repository localRepo
     private Git git
@@ -84,7 +84,7 @@ class GitControl{
                 .call()
     }
 
-    void refresh(){
+    void refresh() {
         this.git.fetch()
                 .setCredentialsProvider(this.credentialsProvider)
                 .setCheckFetchedObjects(true)
@@ -94,9 +94,9 @@ class GitControl{
                 .call()
     }
 
-    void checkoutBranch(String branch){
+    void checkoutBranch(String branch) {
         boolean branchNotExists = this.localRepo.resolve(branch) == null;
-        if(branchNotExists){
+        if (branchNotExists) {
             this.git.branchCreate()
                     .setName(branch)
                     .setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.SET_UPSTREAM)
@@ -115,7 +115,7 @@ class GitControl{
         Iterable<RevCommit> commitList = this.git.log().addRange(refFrom, refTo).call();
         int commitNumber = 0
         commitList.each {
-            if(it.authorIdent.name != 'jenkins'){
+            if (it.authorIdent.name != 'jenkins') {
                 println('=================================================================')
                 println('HASH:' + it.name)
                 println('AUTHOR: ' + it.authorIdent.name)
@@ -129,12 +129,10 @@ class GitControl{
         println('TOTAL COMMITS: ' + commitNumber)
     }
 
-    void printDiffBetweenBranches(String oldBranchName, String newBranchName){
+    void printDiffBetweenBranches(String oldBranchName, String newBranchName) {
         ObjectReader reader = this.localRepo.newObjectReader()
-        Ref oldRef = this.localRepo.exactRef(oldBranchName)
-        Ref newRef = this.localRepo.exactRef(newBranchName)
-
-
+        Ref oldRef = this.localRepo.exactRef('refs/heads/' + oldBranchName)
+        Ref newRef = this.localRepo.exactRef('refs/heads/' + newBranchName)
 
         AbstractTreeIterator oldTreeIterator = new CanonicalTreeParser()
         AbstractTreeIterator newTreeIterator = new CanonicalTreeParser()
@@ -146,18 +144,32 @@ class GitControl{
         newTreeIterator.reset(reader, newTree.getId())
 
         def diffs = this.git.diff()
-            .setNewTree(newTreeIterator)
-            .setOldTree(oldTreeIterator)
-            .call()
-
-
+                .setNewTree(newTreeIterator)
+                .setOldTree(oldTreeIterator)
+                .call()
 
         diffs.each {
-            println(it)
+            println(it.properties.)
         }
 
 
     }
+
+    RevCommit getCommitFromBranchName(String branchName) throws IOException {
+        Ref thisBranch = this.localRepo.exactRef("refs/heads/" + branchName);
+        println("Found branch: " + branchName);
+
+        RevWalk walk = new RevWalk(this.localRepo)
+        RevCommit commit = walk.parseCommit(thisBranch.getObjectId());
+        //ObjectId id = this.localRepo.resolve("38d51408bd");
+        //RevCommit commitAgain = walk.parseCommit(id);
+        println("Found Commit again: " + commit.name);
+        return commit
+
+        walk.dispose();
+    }
+
+
 }
 
 
