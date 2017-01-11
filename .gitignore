@@ -1,6 +1,7 @@
 /target
 .DS_Store
 .slcache/
+.idea/
 out/
 *.iml
 *.ipr
