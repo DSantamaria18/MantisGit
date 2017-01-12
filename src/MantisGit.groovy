@@ -28,31 +28,46 @@ import org.eclipse.jgit.treewalk.CanonicalTreeParser
 
 class MantisGit {
     void test() {
-        String lauraLocalPath = "c:\\TB\\ticketbis\\laura\\"
-        //String lauraLocalPath = "F:\\PortableGit\\ticketbis\\laura\\"
+        //String lauraLocalPath = "c:\\TB\\ticketbis\\laura\\"
+        String lauraLocalPath = "F:\\PortableGit\\ticketbis\\laura\\"
         String lauraRemotePath = "https://github.com/ticketbis/laura.git"
-        String lauraNewBranch = "release/201701102001"
-        String lauraOldBranch = "release/201701092003"
+        String lauraOldBranch = "release/201701102001"
+        String lauraNewBranch = "release/201701112002"
 
-        String hulkLocalPath = "c:\\TB\\ticketbis\\hulk\\"
-        //String hulkLocalPath = "F:\\PortableGit\\ticketbis\\hulk\\"
+        //String hulkLocalPath = "c:\\TB\\ticketbis\\hulk\\"
+        String hulkLocalPath = "F:\\PortableGit\\ticketbis\\hulk\\"
         String hulkRemotePath = "https://github.com/ticketbis/hulk.git"
+        String hulkOldBranch = "release/201701102001"
+        String hulkNewBranch = "release/201701112001"
 
-        String colossusLocalPath = "c:\\TB\\ticketbis\\colossus\\"
-        //String colossusLocalPath = "F:\\PortableGit\\ticketbis\\colossus\\"
+        //String colossusLocalPath = "c:\\TB\\ticketbis\\colossus\\"
+        String colossusLocalPath = "F:\\PortableGit\\ticketbis\\colossus\\"
         String colossusRemotePath = "https://github.com/ticketbis/colossus.git"
+        String colossusFirstCommit = "6f4ff6f4dc3bbb111960e5bb92cc69edfd3bfde8"
+        String colossusLastCommit = "f5e1790d83ce0df34943b19c480cfeff8e0a17bd"
 
         GitControl lauraGC = new GitControl(lauraLocalPath, lauraRemotePath)
         (!new File(lauraLocalPath).exists()) ? lauraGC.cloneRepo() : lauraGC.refresh()
         lauraGC.checkoutBranch(lauraOldBranch)
         lauraGC.checkoutBranch(lauraNewBranch)
+        def listaCommitsLaura = lauraGC.getCommitsBetweenBranches(lauraOldBranch, lauraNewBranch)
+        println("   :: COMMITS LAURA:")
+        listaCommitsLaura.each {println("    :: " + it.name)}
+        println()
+
         //lauraGC.printLogBetweenBranches(lauraOldBranch, lauraNewBranch)
         //lauraGC.printDiffBetweenBranches(lauraOldBranch, lauraNewBranch)
-        lauraGC.getCommitFromBranchName(lauraNewBranch)
-        lauraGC.printDiffBetweenBranches(lauraOldBranch, lauraNewBranch)
+        //lauraGC.getCommitFromBranchName(lauraNewBranch)
+        //lauraGC.printDiffBetweenBranches(lauraOldBranch, lauraNewBranch)
 
         GitControl hulkGC = new GitControl(hulkLocalPath, hulkRemotePath)
         if (!new File(hulkLocalPath).exists()) hulkGC.cloneRepo()
+        hulkGC.checkoutBranch(hulkOldBranch)
+        hulkGC.checkoutBranch(hulkNewBranch)
+        def listaCommitsHulk = hulkGC.getCommitsBetweenBranches(hulkOldBranch, hulkNewBranch)
+        println("   :: COMMITS HULK:")
+        listaCommitsHulk.each {println("    :: " + it.name)}
+        println()
 
         GitControl colossusGC = new GitControl(colossusLocalPath, colossusRemotePath)
         if (!new File(colossusLocalPath).exists()) colossusGC.cloneRepo()
@@ -130,7 +145,17 @@ class GitControl {
             }
         }
         println()
-        println('TOTAL COMMITS: ' + commitNumber)
+        println('   :: TOTAL COMMITS: ' + commitNumber)
+    }
+
+    Iterable<RevCommit> getCommitsBetweenBranches(String branchFrom, String branchTo){
+        String commitFrom = getCommitFromBranchName(branchFrom).name
+        String commitTo = getCommitFromBranchName(branchTo).name
+
+        ObjectId refFrom = this.localRepo.resolve(commitFrom)
+        ObjectId refTo = this.localRepo.resolve(commitTo)
+        Iterable<RevCommit> commitList = this.git.log().addRange(refFrom, refTo).call()
+        return commitList
     }
 
     void printDiffBetweenBranches(String oldBranchName, String newBranchName) {
@@ -155,7 +180,7 @@ class GitControl {
         int numberOfFilesChanged = diffs.size()
         println('   :: FICHEROS MODIFICADOS: ' + numberOfFilesChanged)
 
-        for (DiffEntry entry : diffs) {
+        /*for (DiffEntry entry : diffs) {
             DiffFormatter formatter = new DiffFormatter(System.out)
             formatter.setRepository(this.localRepo)
             formatter.format(entry)
@@ -173,7 +198,7 @@ class GitControl {
                 //println( hunk );
             }
 
-        }
+        }*/
     }
 
     RevCommit getCommitFromBranchName(String branchName) throws IOException {
