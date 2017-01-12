@@ -1,5 +1,7 @@
 import org.eclipse.jgit.api.CreateBranchCommand
 import org.eclipse.jgit.api.errors.NoFilepatternException
+import org.eclipse.jgit.diff.DiffEntry
+import org.eclipse.jgit.diff.DiffFormatter
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.lib.ObjectId
 import org.eclipse.jgit.lib.ObjectReader
@@ -14,6 +16,8 @@ import org.eclipse.jgit.api.errors.InvalidRemoteException
 import org.eclipse.jgit.api.errors.NoHeadException
 import org.eclipse.jgit.api.errors.RefNotFoundException
 import org.eclipse.jgit.api.errors.WrongRepositoryStateException
+import org.eclipse.jgit.patch.FileHeader
+import org.eclipse.jgit.patch.HunkHeader
 import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.revwalk.RevTree
 import org.eclipse.jgit.revwalk.RevWalk
@@ -110,9 +114,9 @@ class GitControl {
     }
 
     void printLogBetweenBranches(final String revFrom, final String revTo) throws IOException, GitAPIException {
-        ObjectId refFrom = this.localRepo.resolve(revFrom);
-        ObjectId refTo = this.localRepo.resolve(revTo);
-        Iterable<RevCommit> commitList = this.git.log().addRange(refFrom, refTo).call();
+        ObjectId refFrom = this.localRepo.resolve(revFrom)
+        ObjectId refTo = this.localRepo.resolve(revTo)
+        Iterable<RevCommit> commitList = this.git.log().addRange(refFrom, refTo).call()
         int commitNumber = 0
         commitList.each {
             if (it.authorIdent.name != 'jenkins') {
@@ -148,11 +152,28 @@ class GitControl {
                 .setOldTree(oldTreeIterator)
                 .call()
 
-        diffs.each {
-            println(it.properties.)
+        int numberOfFilesChanged = diffs.size()
+        println('   :: FICHEROS MODIFICADOS: ' + numberOfFilesChanged)
+
+        for (DiffEntry entry : diffs) {
+            DiffFormatter formatter = new DiffFormatter(System.out)
+            formatter.setRepository(this.localRepo)
+            formatter.format(entry)
+            FileHeader fileHeader = formatter.toFileHeader( entry );
+            List<? extends HunkHeader> hunks = fileHeader.getHunks();
+            for( HunkHeader hunk : hunks ) {
+                println('   :: LINES_CONTEXT: ' + hunk.linesContext)
+                println('   :: BUFFER: ' + hunk.buffer)
+                println('   :: START_OFFSET: ' + hunk.startOffset)
+                println('   :: END_OFFSET: ' + hunk.endOffset)
+                println('   :: FILE_HEADER: ' + hunk.fileHeader)
+                println('   :: NEW_LINE_COUNT: ' + hunk.newLineCount)
+                println('   :: NEW_START_LINE: ' + hunk.newStartLine)
+                println()
+                //println( hunk );
+            }
+
         }
-
-
     }
 
     RevCommit getCommitFromBranchName(String branchName) throws IOException {
